@@ -1,0 +1,62 @@
+#!/bin/bash
+
+set -e
+set -u
+set -o pipefail
+
+################################################################################
+__seq_editor()
+################################################################################
+{
+    local -r todo_command=${1}
+    local -r commit=${2}
+    local -r todo_file=${3}
+
+    # Ensure that a commit with the requested hash exist in the current branch.
+    # The point is that, given commit hash A, `git rebase -i` might find a commit
+    # with hash B that has the same contents, but differs in commit date. This
+    # happens for example if commit B has previously existed in the current branch,
+    # but does not exist anymore, because its hash has changed after a rebase.
+    # While `git rebase -i` will find commit B given commit A hash, `git-redo` is
+    # unable to do so.
+
+    if ! grep -E -q "^pick ${commit}" "${todo_file}"; then
+        printf "\nerror: %s does not exist in the current branch.\n" \
+            "${commit}" 1>& 2
+
+        exit 1
+    fi
+
+    sed -i -r -e "s/^pick ${commit}/${todo_command} ${commit}/" "${todo_file}"
+}
+
+if   [[ ${1} = __seq_editor ]]; then
+    shift
+
+    declare -r g_todo_command=${1}
+    declare -r g_commit=${2}
+    declare -r g_todo_file=${3}
+
+    __seq_editor "${g_todo_command}" "${g_commit}" "${g_todo_file}"
+elif [[ ${1} = amend ]]; then
+    shift
+
+    git stash push
+    git redo edit ${1}
+    git stash pop --index
+    git commit --amend --no-edit
+    git stash push
+    git rebase --continue
+else
+    declare -r g_todo_command=${1}
+    declare -r g_commit=$(git rev-parse ${2})
+
+    declare -r seq_editor_cmd="${BASH_SOURCE} __seq_editor `
+        `${g_todo_command} ${g_commit}"
+
+    git                                        \
+        -c sequence.editor="${seq_editor_cmd}" \
+        -c core.abbrev=no                      \
+        -c rebase.abbreviateCommands=false     \
+        rebase -i "${g_commit}^"
+fi
