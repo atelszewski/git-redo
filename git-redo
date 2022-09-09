@@ -57,5 +57,5 @@ else
         -c sequence.editor="${seq_editor_cmd}" \
         -c core.abbrev=no                      \
         -c rebase.abbreviateCommands=false     \
-        rebase -i "${g_commit}^"
+        rebase -i "${g_commit}~1"
 fi
