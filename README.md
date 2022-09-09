@@ -1,5 +1,4 @@
-git-redo - Process rebase todo list, non-interactively
-======================================================
+# git-redo - Process rebase todo list, non-interactively
 
 `git-redo` is inspired by `git commit --amend`, with the goal of allowing
 to edit any commit on the current branch - and not only the latest one.
@@ -19,7 +18,7 @@ $ git log --oneline
 334c034 git: Update
 ```
 
-with `git-do` one can start editing the desired commit quickly with:
+with `git-redo` one can _edit_ the desired commit quickly with:
 
 ```
 $ git redo edit 9394c01
@@ -32,3 +31,17 @@ Once you are satisfied with your changes, run
 
   git rebase --continue
 ```
+
+Or _amend_ with:
+
+```
+$ git redo amend 9394c01
+```
+
+The change to be applied should  be staged in the index prior amending.
+`git redo amend` will then:
+
+- stash the change,
+- switch to the desired commit,
+- apply the change,
+- and switch back to the current commit.

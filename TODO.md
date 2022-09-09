@@ -8,7 +8,6 @@
 
   - As of now, `amend` sub-command uses the default stash for stashing
     the changes to be applied. Consider using a separate stash.
-  - Detail what `git` commands are executed during amend.
   - Consider allowing to abort on-going and to continue interrupted
     `amend` command (like `rebase` does).
   - `--no-edit` is passed by default to underlying `git commit --amend`
