@@ -41,11 +41,10 @@ if   [[ ${1} = __seq_editor ]]; then
 elif [[ ${1} = amend ]]; then
     shift
 
-    git stash push
+    git stash push --no-keep-index
     git redo edit ${1}
     git stash pop --index
     git commit --amend --no-edit
-    git stash push
     git rebase --continue
 else
     declare -r g_todo_command=${1}
